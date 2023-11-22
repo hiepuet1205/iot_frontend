@@ -1,0 +1,83 @@
+<div class="container1">
+  <div class="data">
+    <h4>Bảng thống kê số liệu</h4>
+    <table id="table1">
+      <tr>
+        <th></th>
+        <th>Nhiệt độ (°C)</th>
+        <th>Độ ẩm (%)</th>
+        <th>Ánh sáng (lux)</th>
+        
+      </tr>
+      <tr>
+        <td>Hiện tại</td>
+        <td id="nhietdo"></td>
+        <td id="doam"></td>
+        <td id="anhsang"></td>
+        
+      </tr>
+      <tr>
+        <td>Cao nhất</td>
+        <td id="max_temp"></td>
+        <td id="max_hum"></td>
+        <td id="max_lux"></td>
+      </tr>
+      <tr>
+        <td>Thấp nhất</td>
+        <td id="min_temp"></td>
+        <td id="min_hum"></td>
+        <td id="min_lux"></td>
+      </tr>
+    </table>
+    <div id="chart">
+      <canvas id="myChart" style="width:100%;max-width:500px"></canvas>
+    </div>
+    <div id="chart1">
+      <canvas id="myCh" style="width:100%;max-width:500px"></canvas>
+    </div>
+  </div>
+  <div class="control">
+      <h3>Điều khiển thiết bị</h3>
+      <h4 id="auto"></h4>
+    <div class="machines">
+      <div class="light">
+        <p id="light1" class="device"><img src="/img/light.png" alt="" class="machine" />
+          Đèn 1</p>
+        <p id="light2" class="device"><img src="/img/light.png" alt="" class="machine" />Đèn 2 </p>
+      </div>
+      <div class="pumps">
+        <p id="pump1"  class="device"><img src="/img/pumps.png" alt="" class="machine" />Máy bơm</p>
+        <p id="air"  class="device"><img src="/img/fan1.png" alt="" class="machine" />Điều hòa</p>
+      </div>
+    </div>
+  </div>
+  <div class="date">
+    <div class="infor-user" >
+      <p><i class='fas fa-id-badge'></i>Nhóm 3</p>
+      <p><i class='fas fa-id-card'></i>MSV : B18DCDT241</p>
+    </div>
+    <div class="show-time">
+      <p id="year"></p>
+      <span>Thời gian : </span>
+      <span id="thoigian"></span>
+    </div>
+    <div id="door">
+      <p id="notify">Cửa đang đóng </p>
+      <p id="notify-pass">Vui lòng nhập mật khẩu</pid>
+      <div class="backDoor">
+        <div class="door"></div>
+      </div>
+      <form id="form">
+        <label for="fname">Mật khẩu cửa</label>
+        <input
+          type="password"
+          id="passdoor"
+          placeholder="Pass door"
+          name="pass_door"
+        />
+        <input id="open-door" type="button" value="Submit" onclick="psdoor()" />
+      </form>
+    </div>
+    <button id="export-data">Export data</button>
+  </div>
+</div>
