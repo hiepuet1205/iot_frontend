@@ -1,7 +1,6 @@
 var mqtt = require('mqtt');
 const clientId = "client" + Math.random().toString(36).substring(7);
 
-// Change this to point to your MQTT broker
 const host = "ws://0.0.0.0:9001/mqtt";
 
 const options = {
@@ -16,48 +15,51 @@ const options = {
 
 var client = mqtt.connect(host, options);
 
-
 client.on('connect', function () {
     client.subscribe('gui-nhiet-do');
     client.subscribe('tt');
     client.subscribe('gui-do-am');
     client.subscribe('gui-anh-sang');
     client.subscribe('gui-do-am-dat');
+    client.subscribe('sql1');
 });
 
-client.on('message', function (topic, message) {
-    var data = message.toString();
+// client.on('message', function (topic, message) {
+//     var data = message.toString();
 
-    console.log(data);
-});
+//     console.log(data);
+// });
 
-let nhietdo = 5;
-let doam = 30;
-let anhsang = 80;
-let doamdat = 160;
+let nhietdo = 0;
+let doam = 0;
+let anhsang = 0;
+let doamdat = 0;
 
 setInterval(() => {
     client.publish('gui-nhiet-do', nhietdo.toString());
     nhietdo++;
-    // console.log(nhietdo);
-}, 5000);
-
-setInterval(() => {
     client.publish('gui-do-am', doam.toString());
     doam += 5;
-    // console.log(doam);
-}, 7000);
-
-setInterval(() => {
     client.publish('gui-anh-sang', anhsang.toString());
     anhsang += 7;
-    // console.log(anhsang);
-}, 3000);
-
-setInterval(() => {
     client.publish('gui-do-am-dat', doamdat.toString());
     doamdat += 3;
-    // console.log(doamdat);
+    client.publish('sql1', Math.random().toString());
 }, 6000);
+
+// setInterval(() => {
+//     client.publish('gui-do-am', doam.toString());
+//     doam += 5;
+// }, 7000);
+
+// setInterval(() => {
+//     client.publish('gui-anh-sang', anhsang.toString());
+//     anhsang += 7;
+// }, 3000);
+
+// setInterval(() => {
+//     client.publish('gui-do-am-dat', doamdat.toString());
+//     doamdat += 3;
+// }, 6000);
 
 

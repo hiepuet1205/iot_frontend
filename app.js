@@ -13,6 +13,32 @@ const fs = require("fs");
 var server = require("http").Server(app);
 var io = require("socket.io")(server);
 
+var mqtt = require('mqtt');
+const clientId = "client" + Math.random().toString(36).substring(7) + "1";
+
+const host = "ws://0.0.0.0:9001/mqtt";
+
+const options = {
+  keepalive: 60,
+  clientId: clientId,
+  protocolId: "MQTT",
+  protocolVersion: 4,
+  clean: true,
+  reconnectPeriod: 1000,
+  connectTimeout: 30 * 1000,
+};
+
+var client = mqtt.connect(host, options);
+
+client.on('connect', function () {
+  client.subscribe('gui-nhiet-do');
+  client.subscribe('tt');
+  client.subscribe('gui-do-am');
+  client.subscribe('gui-anh-sang');
+  client.subscribe('gui-do-am-dat');
+  client.subscribe('sql1');
+});
+
 app.use(express.json());
 app.engine("handlebars", hbs.engine());
 app.set("view engine", "handlebars");
@@ -23,75 +49,44 @@ app.use(express.static(path.join(__dirname, "public")));
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
-//--------------------------------------------------------------
-var temp1, hum1, lux1;
-io.on("connection", function (socket) {
-  console.log("A user connected");
-  io.sockets.emit("oo", "thang");
-  socket.on("disconnect", function () {
-    console.log("A user disconnected");
-  });
+let temp1, hum1, lux1;
 
-  ///send data
+client.on('message', function (topic, message) {
+  var data = message.toString();
 
-  // socket.on("doam", function (data) {
-  //   console.log("do am : " + data);
-  //   hum1 = data;
-  //   socket.broadcast.emit("gui-do-am", data);
-  // });
-  // socket.on("nhietdo", function (data) {
-  //   console.log("nhiet do : " + data);
-  //   temp1 = data;
-  //   socket.broadcast.emit("gui-nhiet-do", data);
-  //   console.log(typeof data);
-  // });
-  // socket.on("anhsang", function (data) {
-  //   console.log("anhsang : " + data);
-  //   lux1 = data;
-  //   socket.broadcast.emit("gui-anh-sang", data);
-  // });
-
-  //----------------------control device--------------------------
-
-  // socket.on("light1", function (data) {
-  //   console.log("msg : " + data);
-  //   socket.broadcast.emit("esp_light1", data);
-  // });
-  // socket.on("oo", function (data) {
-  //   console.log("msg : " + "thang");
-  //   io.sockets.emit("tt", ip1);
-  // });
-  // socket.on("light2", function (data) {
-  //   console.log("msg : " + data);
-  //   socket.broadcast.emit("esp_light2", data);
-  // });
-  // socket.on("pump1", function (data) {
-  //   console.log("msg : " + data);
-  //   socket.broadcast.emit("esp_pump", data);
-  // });
-  // socket.on("air", function (data) {
-  //   console.log("msg : " + data);
-  //   socket.broadcast.emit("esp_air", data);
-  // });
-  // socket.on("fringerprint_open", function (data) {
-  //   console.log("van tay: " + data);
-  //   io.sockets.emit("send-fringerprint-open", data);
-  // });
-  // socket.on("fringerprint_close", function (data) {
-  //   console.log("van tay: " + data);
-  //   socket.broadcast.emit("send-fringerprint-close", data);
-  // });
-  // socket.on("door211", function (data) {
-  //   socket.broadcast.emit("door2", data);
-  //   console.log("door: " + data);
-  // });
-  // socket.on("door23", function (data) {
-  //   socket.broadcast.emit("door3", data);
-  //   console.log("door3: " + data);
-  // });
-  socket.on("sql1", function (data) {
+  if (topic === 'gui-nhiet-do') {
+    handleGuiNhietDo(data);
+  } else if (topic === 'tt') {
+    handleTT(data);
+  } else if (topic === 'gui-do-am') {
+    handleGuiDoAm(data);
+  } else if (topic === 'gui-anh-sang') {
+    handleGuiAnhSang(data);
+  } else if (topic === 'sql1') {
     console.log(data);
+    handleSaveData();
+  } else if (topic === 'export') {
+    handleExportData();
+  }
+});
 
+const handleGuiNhietDo = (data) => {
+  temp1 = data;
+}
+
+const handleGuiDoAm = (data) => {
+  hum1 = data;
+}
+
+const handleGuiAnhSang = (data) => {
+  lux1 = data;
+}
+
+const handleSaveData = () => {
+  console.log('Save data');
+  console.log(temp1, hum1, lux1)
+  connection.connect(function (err) {
+    if (err) throw err;
     var n = new Date();
     var month = n.getMonth() + 1;
     var Date_and_Time =
@@ -106,14 +101,7 @@ io.on("connection", function (socket) {
       n.getMinutes() +
       ":" +
       n.getSeconds();
-    if (
-      temp1 > 0 &&
-      temp1 < 100 &&
-      hum1 > 0 &&
-      hum1 < 100 &&
-      lux1 > 0 &&
-      lux1 < 1024
-    ) {
+    if (temp1 > 0 && temp1 < 100 && hum1 > 0 && hum1 < 100 && lux1 > 0 && lux1 < 1024) {
       var sql =
         "INSERT INTO data3 (Time, Temperature, Humidity, Light) VALUES ('" +
         Date_and_Time.toString() +
@@ -130,132 +118,57 @@ io.on("connection", function (socket) {
         console.log(Date_and_Time + " " + temp1 + " " + hum1 + " " + lux1);
       });
     }
-    connection.connect(function (err) {
-      if (err) throw err;
-      connection.query(
-        "SELECT max(Temperature) from data3",
-        function (err, result, fields) {
-          if (err) throw err;
+    connection.query(
+      "SELECT * FROM data3 order by id desc limit 30",
+      function (err, result, fields) {
+        if (err) throw err;
+        client.publish("table1", "5");
+      }
+    );
+  })
+}
 
-          result.forEach(function (max_temp) {
-            var temp2 = Object.values(max_temp);
-            // console.log(temp2)
-            var temp_max = temp2[0];
-            socket.broadcast.emit("max_temp", temp_max);
-          });
-        }
-      );
-      connection.query(
-        "SELECT MIN(Temperature) FROM data3",
-        function (err, result, fields) {
-          if (err) throw err;
-          result.forEach(function (min_temp) {
-            var temp3 = Object.values(min_temp);
-            temp_min = temp3[0];
-            socket.broadcast.emit("min_temp", temp_min);
-          });
-        }
-      );
-      //---------------------------------humidity
-      connection.query(
-        "SELECT MAX(Humidity) FROM data3",
-        function (err, result, fields) {
-          if (err) throw err;
-          result.forEach(function (max_hum) {
-            var hum2 = Object.values(max_hum);
-            var hum_max = hum2[0];
-            socket.broadcast.emit("max_hum", hum_max);
-          });
-        }
-      );
-      connection.query(
-        "SELECT MIN(Humidity) FROM data3",
-        function (err, result, fields) {
-          if (err) throw err;
-          result.forEach(function (max_hum) {
-            var hum3 = Object.values(max_hum);
-            hum_min = hum3[0];
-            socket.broadcast.emit("min_hum", hum_min);
-          });
-        }
-      );
-      //---------------------------------lux
-      connection.query(
-        "SELECT MAX(Light) FROM data3",
-        function (err, result, fields) {
-          if (err) throw err;
-          result.forEach(function (max_lux) {
-            var lux2 = Object.values(max_lux);
-            var lux_max = lux2[0];
-            socket.broadcast.emit("max_lux", lux_max);
-          });
-        }
-      );
-      connection.query(
-        "SELECT MIN(Light) FROM data3",
-        function (err, result, fields) {
-          if (err) throw err;
-          result.forEach(function (max_lux) {
-            var lux3 = Object.values(max_lux);
-            lux_min = lux3[0];
-            socket.broadcast.emit("min_lux", lux_min);
-          });
-        }
-      );
-      if (err) throw err;
-      connection.query(
-        "SELECT * FROM data3 order by id desc limit 30",
-        function (err, result, fields) {
-          if (err) throw err;
-          socket.broadcast.emit("table1", result);
-        }
-      );
-    });
-  });
-  socket.on("export", function (data) {
-    console.log(data);
-    connection.connect(function (err) {
-      if (err) throw err;
-      connection.query(
-        "SELECT * FROM data3 order by id desc limit 30",
-        function (err, result, fields) {
-          if (err) throw err;
-          var data =
-            "ID" +
+const handleExportData = () => {
+  connection.connect(function (err) {
+    if (err) throw err;
+    connection.query(
+      "SELECT * FROM data3 order by id desc limit 30",
+      function (err, result, fields) {
+        if (err) throw err;
+        var data =
+          "ID" +
+          "\t" +
+          "Time" +
+          "\t" +
+          "Temperature" +
+          "\t" +
+          "Humidity" +
+          "\t" +
+          "Light" +
+          "\n";
+        for (var i = 0; i < result.length; i++) {
+          data =
+            data +
+            result[i].ID +
             "\t" +
-            "Time" +
+            result[i].Time +
             "\t" +
-            "Temperature" +
+            result[i].Temperature +
             "\t" +
-            "Humidity" +
+            result[i].Humidity +
             "\t" +
-            "Light" +
+            result[i].Light +
             "\n";
-          for (var i = 0; i < result.length; i++) {
-            data =
-              data +
-              result[i].ID +
-              "\t" +
-              result[i].Time +
-              "\t" +
-              result[i].Temperature +
-              "\t" +
-              result[i].Humidity +
-              "\t" +
-              result[i].Light +
-              "\n";
-          }
-          fs.writeFile(`data.xls`, data, (err) => {
-            if (err) throw err;
-            console.log("File created");
-          });
         }
-      );
-    });
+        fs.writeFile(`data.xls`, data, (err) => {
+          if (err) throw err;
+          console.log("File created");
+        });
+      }
+    );
   });
-});
-///-------------------------------------------------------------------------
-//-------------------------------------------------------------------------
+}
+
 var thang = [];
 
 app.get("/", (req, res) => {
@@ -277,7 +190,7 @@ app.get("/", (req, res) => {
       " " +
       thang[thang.length - 1].status +
       "\n";
-    fs.appendFile(`ip_address_list.txt`, dataIp, (err) => {});
+    fs.appendFile(`ip_address_list.txt`, dataIp, (err) => { });
   }
   console.log(thang);
 
@@ -360,7 +273,7 @@ app.post("/user", async (req, res) => {
           }
           if (dem1 < 0) {
             console.log("in");
-            fs.appendFile(`ipIncorrect.txt`, dataIpCorrect, (err) => {});
+            fs.appendFile(`ipIncorrect.txt`, dataIpCorrect, (err) => { });
           }
           console.log(ipIncorrect);
           console.log(dem);
@@ -379,7 +292,6 @@ app.get("/history", (req, res) => {
   res.render("user/history");
 });
 
-// su dung routes
 app.use("/user", user);
 server.listen(port, function () {
   console.log("Server listening on port " + port);

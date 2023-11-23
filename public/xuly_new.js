@@ -39,8 +39,6 @@ client.on('connect', function () {
 client.on('message', function (topic, message) {
   var data = message.toString();
 
-  console.log(data);
-
   if (topic === 'gui-nhiet-do') {
     handleGuiNhietDo(data);
   } else if (topic === 'tt') {
