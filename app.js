@@ -34,61 +34,61 @@ io.on("connection", function (socket) {
 
   ///send data
 
-  socket.on("doam", function (data) {
-    console.log("do am : " + data);
-    hum1 = data;
-    socket.broadcast.emit("gui-do-am", data);
-  });
-  socket.on("nhietdo", function (data) {
-    console.log("nhiet do : " + data);
-    temp1 = data;
-    socket.broadcast.emit("gui-nhiet-do", data);
-    console.log(typeof data);
-  });
-  socket.on("anhsang", function (data) {
-    console.log("anhsang : " + data);
-    lux1 = data;
-    socket.broadcast.emit("gui-anh-sang", data);
-  });
+  // socket.on("doam", function (data) {
+  //   console.log("do am : " + data);
+  //   hum1 = data;
+  //   socket.broadcast.emit("gui-do-am", data);
+  // });
+  // socket.on("nhietdo", function (data) {
+  //   console.log("nhiet do : " + data);
+  //   temp1 = data;
+  //   socket.broadcast.emit("gui-nhiet-do", data);
+  //   console.log(typeof data);
+  // });
+  // socket.on("anhsang", function (data) {
+  //   console.log("anhsang : " + data);
+  //   lux1 = data;
+  //   socket.broadcast.emit("gui-anh-sang", data);
+  // });
 
   //----------------------control device--------------------------
 
-  socket.on("light1", function (data) {
-    console.log("msg : " + data);
-    socket.broadcast.emit("esp_light1", data);
-  });
-  socket.on("oo", function (data) {
-    console.log("msg : " + "thang");
-    io.sockets.emit("tt", ip1);
-  });
-  socket.on("light2", function (data) {
-    console.log("msg : " + data);
-    socket.broadcast.emit("esp_light2", data);
-  });
-  socket.on("pump1", function (data) {
-    console.log("msg : " + data);
-    socket.broadcast.emit("esp_pump", data);
-  });
-  socket.on("air", function (data) {
-    console.log("msg : " + data);
-    socket.broadcast.emit("esp_air", data);
-  });
-  socket.on("fringerprint_open", function (data) {
-    console.log("van tay: " + data);
-    io.sockets.emit("send-fringerprint-open", data);
-  });
-  socket.on("fringerprint_close", function (data) {
-    console.log("van tay: " + data);
-    socket.broadcast.emit("send-fringerprint-close", data);
-  });
-  socket.on("door211", function (data) {
-    socket.broadcast.emit("door2", data);
-    console.log("door: " + data);
-  });
-  socket.on("door23", function (data) {
-    socket.broadcast.emit("door3", data);
-    console.log("door3: " + data);
-  });
+  // socket.on("light1", function (data) {
+  //   console.log("msg : " + data);
+  //   socket.broadcast.emit("esp_light1", data);
+  // });
+  // socket.on("oo", function (data) {
+  //   console.log("msg : " + "thang");
+  //   io.sockets.emit("tt", ip1);
+  // });
+  // socket.on("light2", function (data) {
+  //   console.log("msg : " + data);
+  //   socket.broadcast.emit("esp_light2", data);
+  // });
+  // socket.on("pump1", function (data) {
+  //   console.log("msg : " + data);
+  //   socket.broadcast.emit("esp_pump", data);
+  // });
+  // socket.on("air", function (data) {
+  //   console.log("msg : " + data);
+  //   socket.broadcast.emit("esp_air", data);
+  // });
+  // socket.on("fringerprint_open", function (data) {
+  //   console.log("van tay: " + data);
+  //   io.sockets.emit("send-fringerprint-open", data);
+  // });
+  // socket.on("fringerprint_close", function (data) {
+  //   console.log("van tay: " + data);
+  //   socket.broadcast.emit("send-fringerprint-close", data);
+  // });
+  // socket.on("door211", function (data) {
+  //   socket.broadcast.emit("door2", data);
+  //   console.log("door: " + data);
+  // });
+  // socket.on("door23", function (data) {
+  //   socket.broadcast.emit("door3", data);
+  //   console.log("door3: " + data);
+  // });
   socket.on("sql1", function (data) {
     console.log(data);
 

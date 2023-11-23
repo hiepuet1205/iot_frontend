@@ -1,11 +1,17 @@
 var nhiet_do = [];
+let max_temp = 0;
+let min_temp = 99999999999999999999999;
 var do_am = [];
+let max_hum = 0;
+let min_hum = 99999999999999999999999;
 var anh_sang = [];
+let max_lux = 0;
+let min_lux = 99999999999999999999999;
 var dat = [];
+var k = 0;
 
 const clientId = "client" + Math.random().toString(36).substring(7);
 
-// Change this to point to your MQTT broker
 const host = "ws://localhost:9001/mqtt";
 
 const options = {
@@ -26,7 +32,8 @@ client.on('connect', function () {
   client.subscribe('gui-do-am');
   client.subscribe('gui-anh-sang');
   client.subscribe('gui-do-am-dat');
-  // Thêm các topic khác nếu cần
+  client.subscribe('send-fringerprint-open');
+  client.subscribe('send-fringerprint-close');
 });
 
 client.on('message', function (topic, message) {
@@ -44,12 +51,24 @@ client.on('message', function (topic, message) {
     handleGuiAnhSang(data);
   } else if (topic === 'gui-do-am-dat') {
     handleGuiDoAmDat(data);
+  } else if (topic === 'send-fringerprint-open') {
+    handleSendFringerPrintOpen();
+  } else if (topic === 'send-fringerprint-close') {
+    handleSendFringerPrintClose();
   }
-  // Xử lý các thông điệp từ các topic khác nếu cần
 });
 
-// Các hàm xử lý thông điệp từ các topic tương ứng
 function handleGuiNhietDo(data) {
+  console.log(data);
+  if (data > max_temp) {
+    max_temp = data;
+    $("#max_temp").text(data);
+  }
+  if (data < min_temp) {
+    min_temp = data;
+    $("#min_temp").text(data);
+  }
+
   if (nhiet_do.length < 10) {
     nhiet_do.push(data);
   } else {
@@ -65,23 +84,32 @@ function handleGuiNhietDo(data) {
   }
 }
 
-function handleTT(data) {
-  console.log(data);
+// function handleTT(data) {
+//   console.log(data);
 
-  if (data > 0 && data < 3) {
-    alert("Xin vui lòng kiểm tra tài khoản/mật khẩu");
-  }
+//   if (data > 0 && data < 3) {
+//     alert("Xin vui lòng kiểm tra tài khoản/mật khẩu");
+//   }
 
-  if (data == 0) {
-    alert("Bạn đã quá số lần đăng nhập sai. Vui lòng liên hệ gmail: thangc2k53@gmail.com để mở lại thiết bị");
-    document.getElementById('logout').innerHTML = "<p>Liên hệ admin để mở tài khoản</p>";
-  }
+//   if (data == 0) {
+//     alert("Bạn đã quá số lần đăng nhập sai. Vui lòng liên hệ gmail: thangc2k53@gmail.com để mở lại thiết bị");
+//     document.getElementById('logout').innerHTML = "<p>Liên hệ admin để mở tài khoản</p>";
+//   }
 
-  var text1 = data;
-  document.getElementById('log').textContent = text1;
-}
+//   var text1 = data;
+//   document.getElementById('log').textContent = text1;
+// }
 
 function handleGuiDoAm(data) {
+  if (data > max_hum) {
+    max_hum = data;
+    $("#max_hum").text(data);
+  }
+  if (data < min_hum) {
+    min_hum = data;
+    $("#min_hum").text(data);
+  }
+
   if (do_am.length < 10) {
     do_am.push(data);
   } else {
@@ -92,6 +120,14 @@ function handleGuiDoAm(data) {
 }
 
 function handleGuiAnhSang(data) {
+  if (data > max_lux) {
+    max_lux = data;
+    $("#max_lux").text(data);
+  }
+  if (data < min_lux) {
+    min_lux = data;
+    $("#min_lux").text(data);
+  }
   if (anh_sang.length < 10) {
     anh_sang.push(data);
   } else {
@@ -99,43 +135,55 @@ function handleGuiAnhSang(data) {
     anh_sang.push(data);
   }
   document.getElementById('anhsang').textContent = data;
-  chart_data(); // Gọi hàm để vẽ biểu đồ dữ liệu
+  chart_data();
 }
 
 function handleGuiDoAmDat(data) {
-  if (dat.length < 10) {
-    dat.push(data);
-  } else {
-    dat.shift();
-    dat.push(data);
-  }
-  document.getElementById('doamdat').textContent = data;
+  // if (dat.length < 10) {
+  //   dat.push(data);
+  // } else {
+  //   dat.shift();
+  //   dat.push(data);
+  // }
+  // document.getElementById('doamdat').textContent = data;
 }
 
-// Xử lý các thông điệp từ các topic khác nếu cần
+function handleSendFringerPrintOpen() {
+  $(".door").addClass("doorOpen");
+  $(".door").removeClass("doorClose");
+  $("#notify").html("<p>Mật khẩu đúng</p>");
+  $("#notify-pass").html("<p>Cửa đã được mở</p>");
+}
+function handleSendFringerPrintClose() {
+  $(".door").addClass("doorClose");
+  $(".door").removeClass("doorOpen");
+  $("#notify").html("<p>Mật khẩu đúng</p>");
+  $("#notify-pass").html("<p>Cửa đã được đóng</p>");
+}
 
-// Các sự kiện click và gửi thông điệp MQTT
 document.addEventListener('DOMContentLoaded', function () {
   document.getElementById('light1').addEventListener('click', function () {
     try {
-      client.publish('gui-nhiet-do', '5');
-
+      client.publish('light1', '1');
     } catch (error) {
       console.log(error);
     }
-    // client.publish('light1', 'light1');
   });
 
   document.getElementById('light2').addEventListener('click', function () {
-    client.publish('light2', 'light2');
+    try {
+      client.publish('light2', '1');
+    } catch (error) {
+      console.log(error);
+    }
   });
 
   document.getElementById('pump1').addEventListener('click', function () {
-    client.publish('pump1', 'pump1');
+    client.publish('pump1', '1');
   });
 
   document.getElementById('air').addEventListener('click', function () {
-    client.publish('air', 'air');
+    client.publish('air', '1');
   });
 
   document.getElementById('export-data').addEventListener('click', function () {
@@ -166,7 +214,6 @@ document.addEventListener('DOMContentLoaded', function () {
   });
 });
 
-// Hàm xử lý mật khẩu cửa
 function psdoor() {
   var pass1 = document.getElementById("passdoor").value;
   return pass1;

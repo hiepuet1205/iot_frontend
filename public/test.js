@@ -55,7 +55,7 @@ setInterval(() => {
 }, 3000);
 
 setInterval(() => {
-    client.publish('gui-nhiet-do', doamdat.toString());
+    client.publish('gui-do-am-dat', doamdat.toString());
     doamdat += 3;
     // console.log(doamdat);
 }, 6000);
