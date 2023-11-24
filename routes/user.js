@@ -3,21 +3,18 @@ const { connection } = require("../config/db");
 const fs = require("fs");
 const router = express.Router();
 const requestIp = require("request-ip");
-// routes toi user
 router.get("/", (req, res) => {
   res.render("user/login");
 });
 
-// routes toi user/register
 router.get("/register", (req, res) => {
   res.render("user/register");
 });
 
-// routes toi user/control
 router.get("/control", (req, res) => {
   res.render("user/control");
 });
-// routes toi user/history
+
 router.get("/history", (req, res) => {
   res.render("user/history");
 });

@@ -16,19 +16,49 @@ const options = {
 var client = mqtt.connect(host, options);
 
 client.on('connect', function () {
-    client.subscribe('gui-nhiet-do');
-    client.subscribe('tt');
-    client.subscribe('gui-do-am');
-    client.subscribe('gui-anh-sang');
-    client.subscribe('gui-do-am-dat');
-    client.subscribe('sql1');
+    client.subscribe('temp');
+    client.subscribe('hum');
+    client.subscribe('lux');
+    client.subscribe('soilMoisture');
+    client.subscribe('light1');
+    client.subscribe('light2');
+    client.subscribe('air');
+    client.subscribe('pump');
+    client.subscribe('light1-st');
+    client.subscribe('light2-st');
+    client.subscribe('air-st');
+    client.subscribe('pump-st');
 });
 
-// client.on('message', function (topic, message) {
-//     var data = message.toString();
+client.on('message', function (topic, message) {
+    var data = message.toString();
 
-//     console.log(data);
-// });
+    if (topic === 'light1') {
+        handleLight1Control(data);
+    } else if (topic === 'light2') {
+        handleLight2Control(data);
+    } else if (topic === 'air') {
+        handleAirControl(data);
+    } else if (topic === 'pump') {
+        handlePumpControl(data);
+    }
+});
+
+function handleLight1Control(data) {
+    client.publish('light1-st', data)
+}
+
+function handleLight2Control(data) {
+    client.publish('light2-st', data)
+}
+
+function handleAirControl(data) {
+    client.publish('air-st', data)
+}
+
+function handlePumpControl(data) {
+    client.publish('pump-st', data)
+}
 
 let nhietdo = 0;
 let doam = 0;
@@ -36,30 +66,15 @@ let anhsang = 0;
 let doamdat = 0;
 
 setInterval(() => {
-    client.publish('gui-nhiet-do', nhietdo.toString());
+    client.publish('temp', nhietdo.toString());
     nhietdo++;
-    client.publish('gui-do-am', doam.toString());
+    client.publish('hum', doam.toString());
     doam += 5;
-    client.publish('gui-anh-sang', anhsang.toString());
+    client.publish('lux', anhsang.toString());
     anhsang += 7;
-    client.publish('gui-do-am-dat', doamdat.toString());
+    client.publish('soilMoisture', doamdat.toString());
     doamdat += 3;
     client.publish('sql1', Math.random().toString());
 }, 6000);
-
-// setInterval(() => {
-//     client.publish('gui-do-am', doam.toString());
-//     doam += 5;
-// }, 7000);
-
-// setInterval(() => {
-//     client.publish('gui-anh-sang', anhsang.toString());
-//     anhsang += 7;
-// }, 3000);
-
-// setInterval(() => {
-//     client.publish('gui-do-am-dat', doamdat.toString());
-//     doamdat += 3;
-// }, 6000);
 
 

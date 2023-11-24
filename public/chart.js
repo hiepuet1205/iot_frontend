@@ -1,8 +1,8 @@
 function chart_data() {
   var nuoc = 50;
-  var temperature = nhiet_do;
-  var humidity = do_am;
-  var lux = anh_sang;
+  var temperature = temps;
+  var humidity = hums;
+  var soilMoisture = soils;
   var xValues = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
   new Chart("myChart", {
     type: "bar",
@@ -38,8 +38,8 @@ function chart_data() {
       labels: xValues,
       datasets: [
         {
-          label: "Lux",
-          data: lux,
+          label: "Soil Moisture",
+          data: soilMoisture,
           borderColor: "yellow",
           fill: false,
         },
@@ -49,7 +49,7 @@ function chart_data() {
       legend: { display: true },
       title: {
         display: true,
-        text: "BIỂU ĐỒ DỮ LIỆU CẢM BIẾN ÁNH SÁNG",
+        text: "BIỂU ĐỒ DỮ LIỆU CẢM BIẾN Độ Ẩm Đất",
       },
     },
   });

@@ -6,27 +6,27 @@
         <th></th>
         <th>Nhiệt độ (°C)</th>
         <th>Độ ẩm (%)</th>
-        <th>Ánh sáng (lux)</th>
-        
+        <th>Độ ẩm đất (%)</th>
+
       </tr>
       <tr>
         <td>Hiện tại</td>
-        <td id="nhietdo"></td>
-        <td id="doam"></td>
-        <td id="anhsang"></td>
-        
+        <td id="temp"></td>
+        <td id="hum"></td>
+        <td id="soil"></td>
+
       </tr>
       <tr>
         <td>Cao nhất</td>
         <td id="max_temp"></td>
         <td id="max_hum"></td>
-        <td id="max_lux"></td>
+        <td id="max_soil"></td>
       </tr>
       <tr>
         <td>Thấp nhất</td>
         <td id="min_temp"></td>
         <td id="min_hum"></td>
-        <td id="min_lux"></td>
+        <td id="min_soil"></td>
       </tr>
     </table>
     <div id="chart">
@@ -37,22 +37,22 @@
     </div>
   </div>
   <div class="control">
-      <h3>Điều khiển thiết bị</h3>
-      <h4 id="auto"></h4>
+    <h3>Điều khiển thiết bị</h3>
+    <h4 id="auto"></h4>
     <div class="machines">
       <div class="light">
-        <p id="light1" class="device"><img src="/img/light.png" alt="" class="machine" />
+        <p id="light1" class="device"><img id="light1img" src="/img/lightOff.png" alt="" class="machine" />
           Đèn 1</p>
-        <p id="light2" class="device"><img src="/img/light.png" alt="" class="machine" />Đèn 2 </p>
+        <p id="light2" class="device"><img id="light2img" src="/img/lightOff.png" alt="" class="machine" />Đèn 2 </p>
       </div>
       <div class="pumps">
-        <p id="pump1"  class="device"><img src="/img/pumps.png" alt="" class="machine" />Máy bơm</p>
-        <p id="air"  class="device"><img src="/img/fan1.png" alt="" class="machine" />Điều hòa</p>
+        <p id="pump1" class="device"><img src="/img/pumps.png" alt="" class="machine" />Máy bơm</p>
+        <p id="air" class="device"><img src="/img/fan1.png" alt="" class="machine" />Điều hòa</p>
       </div>
     </div>
   </div>
   <div class="date">
-    <div class="infor-user" >
+    <div class="infor-user">
       <p><i class='fas fa-id-badge'></i>Nhóm 5</p>
     </div>
     <div class="show-time">
@@ -68,12 +68,7 @@
       </div>
       <form id="form">
         <label for="fname">Mật khẩu cửa</label>
-        <input
-          type="password"
-          id="passdoor"
-          placeholder="Pass door"
-          name="pass_door"
-        />
+        <input type="password" id="passdoor" placeholder="Pass door" name="pass_door" />
         <input id="open-door" type="button" value="Submit" onclick="psdoor()" />
       </form>
     </div>

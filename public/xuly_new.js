@@ -1,14 +1,18 @@
-var nhiet_do = [];
+var temps = [];
 let max_temp = 0;
 let min_temp = 99999999999999999999999;
-var do_am = [];
+var hums = [];
 let max_hum = 0;
 let min_hum = 99999999999999999999999;
-var anh_sang = [];
-let max_lux = 0;
-let min_lux = 99999999999999999999999;
+var soils = [];
+let max_soil = 0;
+let min_soil = 99999999999999999999999;
 var dat = [];
 var k = 0;
+let isLight1Open = false;
+let isLight2Open = false;
+let isAirOpen = false;
+let isPumpOpen = false;
 
 const clientId = "client" + Math.random().toString(36).substring(7);
 
@@ -27,37 +31,46 @@ const options = {
 var client = mqtt.connect(host, options);
 
 client.on('connect', function () {
-  client.subscribe('gui-nhiet-do');
-  client.subscribe('tt');
-  client.subscribe('gui-do-am');
-  client.subscribe('gui-anh-sang');
-  client.subscribe('gui-do-am-dat');
-  client.subscribe('send-fringerprint-open');
-  client.subscribe('send-fringerprint-close');
+  client.subscribe('temp');
+  client.subscribe('hum');
+  // client.subscribe('lux');
+  client.subscribe('soilMoisture');
+  client.subscribe('light1-st');
+  client.subscribe('light2-st');
+  client.subscribe('air-st');
+  client.subscribe('pump-st');
+  // client.subscribe('send-fringerprint-open');
+  // client.subscribe('send-fringerprint-close');
 });
 
 client.on('message', function (topic, message) {
   var data = message.toString();
 
-  if (topic === 'gui-nhiet-do') {
-    handleGuiNhietDo(data);
-  } else if (topic === 'tt') {
-    handleTT(data);
-  } else if (topic === 'gui-do-am') {
-    handleGuiDoAm(data);
-  } else if (topic === 'gui-anh-sang') {
-    handleGuiAnhSang(data);
-  } else if (topic === 'gui-do-am-dat') {
-    handleGuiDoAmDat(data);
-  } else if (topic === 'send-fringerprint-open') {
-    handleSendFringerPrintOpen();
-  } else if (topic === 'send-fringerprint-close') {
-    handleSendFringerPrintClose();
+  if (topic === 'temp') {
+    handleTempData(data);
+  } else if (topic === 'hum') {
+    handleHumData(data);
+  } else if (topic === 'lux') {
+    handleLuxData(data);
+  } else if (topic === 'soilMoisture') {
+    handleSoilMoistureData(data);
+  } else if (topic === 'light1-st') {
+    handleLight1Status(data);
+  } else if (topic === 'light2-st') {
+    handleLight2Status(data);
+  } else if (topic === 'air-st') {
+    handleAirStatus(data);
+  } else if (topic === 'pump-st') {
+    handlePumpStatus(data);
   }
+  // } else if (topic === 'send-fringerprint-open') {
+  //   handleSendFringerPrintOpen();
+  // } else if (topic === 'send-fringerprint-close') {
+  //   handleSendFringerPrintClose();
+  // }
 });
 
-function handleGuiNhietDo(data) {
-  console.log(data);
+function handleTempData(data) {
   if (data > max_temp) {
     max_temp = data;
     $("#max_temp").text(data);
@@ -67,38 +80,16 @@ function handleGuiNhietDo(data) {
     $("#min_temp").text(data);
   }
 
-  if (nhiet_do.length < 10) {
-    nhiet_do.push(data);
+  if (temps.length < 10) {
+    temps.push(data);
   } else {
-    nhiet_do.shift();
-    nhiet_do.push(data);
+    temps.shift();
+    temps.push(data);
   }
-  document.getElementById('nhietdo').textContent = data;
-
-  if (data > 30) {
-    document.getElementById('auto').innerHTML = "<p>Nhiệt độ cao. Điều hòa đang được tự động bật</p>";
-  } else {
-    document.getElementById('auto').innerHTML = "<p></p>";
-  }
+  document.getElementById('temp').textContent = data;
 }
 
-// function handleTT(data) {
-//   console.log(data);
-
-//   if (data > 0 && data < 3) {
-//     alert("Xin vui lòng kiểm tra tài khoản/mật khẩu");
-//   }
-
-//   if (data == 0) {
-//     alert("Bạn đã quá số lần đăng nhập sai. Vui lòng liên hệ gmail: thangc2k53@gmail.com để mở lại thiết bị");
-//     document.getElementById('logout').innerHTML = "<p>Liên hệ admin để mở tài khoản</p>";
-//   }
-
-//   var text1 = data;
-//   document.getElementById('log').textContent = text1;
-// }
-
-function handleGuiDoAm(data) {
+function handleHumData(data) {
   if (data > max_hum) {
     max_hum = data;
     $("#max_hum").text(data);
@@ -108,61 +99,118 @@ function handleGuiDoAm(data) {
     $("#min_hum").text(data);
   }
 
-  if (do_am.length < 10) {
-    do_am.push(data);
+  if (hums.length < 10) {
+    hums.push(data);
   } else {
-    do_am.shift();
-    do_am.push(data);
+    hums.shift();
+    hums.push(data);
   }
-  document.getElementById('doam').textContent = data;
+  document.getElementById('hum').textContent = data;
 }
 
-function handleGuiAnhSang(data) {
-  if (data > max_lux) {
-    max_lux = data;
-    $("#max_lux").text(data);
+// function handleLuxData(data) {
+//   if (data > max_soil) {
+//     max_soil = data;
+//     $("#max_soil").text(data);
+//   }
+//   if (data < min_soil) {
+//     min_soil = data;
+//     $("#min_soil").text(data);
+//   }
+//   if (soils.length < 10) {
+//     soils.push(data);
+//   } else {
+//     soils.shift();
+//     soils.push(data);
+//   }
+//   document.getElementById('lux').textContent = data;
+//   chart_data();
+// }
+
+function handleSoilMoistureData(data) {
+  if (data > max_soil) {
+    max_soil = data;
+    $("#max_soil").text(data);
   }
-  if (data < min_lux) {
-    min_lux = data;
-    $("#min_lux").text(data);
+  if (data < min_soil) {
+    min_soil = data;
+    $("#min_soil").text(data);
   }
-  if (anh_sang.length < 10) {
-    anh_sang.push(data);
+  if (soils.length < 10) {
+    soils.push(data);
   } else {
-    anh_sang.shift();
-    anh_sang.push(data);
+    soils.shift();
+    soils.push(data);
   }
-  document.getElementById('anhsang').textContent = data;
+  document.getElementById('soil').textContent = data;
   chart_data();
 }
 
-function handleGuiDoAmDat(data) {
-  // if (dat.length < 10) {
-  //   dat.push(data);
-  // } else {
-  //   dat.shift();
-  //   dat.push(data);
-  // }
-  // document.getElementById('doamdat').textContent = data;
+function handleLight1Status(data) {
+  console.log(data);
+  if (data.toString() == '0') {
+    isLight1Open = false;
+    document.getElementById("light1").innerHTML = '<img id="light1img" src="/img/lightOff.png" alt="" class="machine" />Đèn 1</p>'
+  } else if (data.toString() == '1') {
+    isLight1Open = true;
+    document.getElementById("light1").innerHTML = '<img id="light1img" src="/img/light.png" alt="" class="machine" />Đèn 1</p>'
+  }
 }
 
-function handleSendFringerPrintOpen() {
-  $(".door").addClass("doorOpen");
-  $(".door").removeClass("doorClose");
-  $("#notify").html("<p>Mật khẩu đúng</p>");
-  $("#notify-pass").html("<p>Cửa đã được mở</p>");
+function handleLight2Status(data) {
+  console.log(data)
+  if (data.toString() == '0') {
+    isLight2Open = false;
+    document.getElementById("light2").innerHTML = '<img id="light2img" src="/img/lightOff.png" alt="" class="machine" />Đèn 2</p>'
+  } else if (data.toString() == '1') {
+    isLight2Open = true;
+    document.getElementById("light2").innerHTML = '<img id="light2img" src="/img/light.png" alt="" class="machine" />Đèn 2</p>'
+  }
 }
-function handleSendFringerPrintClose() {
-  $(".door").addClass("doorClose");
-  $(".door").removeClass("doorOpen");
-  $("#notify").html("<p>Mật khẩu đúng</p>");
-  $("#notify-pass").html("<p>Cửa đã được đóng</p>");
+
+function handleAirStatus(data) {
+  if (data.toString() == '0') {
+    isAirOpen = false;
+    document.getElementById('air').innerHTML = '<img src="/img/fan1.png" alt="" class="machine" />Điều hòa (OFF)';
+    document.getElementById('auto').innerHTML = "";
+  } else if (data.toString() == '1') {
+    isAirOpen = true;
+    document.getElementById('air').innerHTML = '<img src="/img/fan1.png" alt="" class="machine" />Điều hòa (ON)';
+    document.getElementById('auto').innerHTML = "<p>Nhiệt độ cao. Điều hòa đang được bật</p>";
+  }
 }
+
+function handlePumpStatus(data) {
+  if (data.toString() == '0') {
+    isPumpOpen = false;
+    document.getElementById('pump1').innerHTML = '<img src="/img/pumps.png" alt="" class="machine" />Máy bơm (OFF)';
+  } else if (data.toString() == '1') {
+    isPumpOpen = true;
+    document.getElementById('pump1').innerHTML = '<img src="/img/pumps.png" alt="" class="machine" />Máy bơm (ON)';
+  }
+}
+
+// function handleSendFringerPrintOpen() {
+//   $(".door").addClass("doorOpen");
+//   $(".door").removeClass("doorClose");
+//   $("#notify").html("<p>Mật khẩu đúng</p>");
+//   $("#notify-pass").html("<p>Cửa đã được mở</p>");
+// }
+// function handleSendFringerPrintClose() {
+//   $(".door").addClass("doorClose");
+//   $(".door").removeClass("doorOpen");
+//   $("#notify").html("<p>Mật khẩu đúng</p>");
+//   $("#notify-pass").html("<p>Cửa đã được đóng</p>");
+// }
 
 document.addEventListener('DOMContentLoaded', function () {
   document.getElementById('light1').addEventListener('click', function () {
     try {
-      client.publish('light1', '1');
+      if (isLight1Open) {
+        client.publish('light1', '0');
+      } else {
+        client.publish('light1', '1');
+      }
     } catch (error) {
       console.log(error);
     }
@@ -170,22 +218,50 @@ document.addEventListener('DOMContentLoaded', function () {
 
   document.getElementById('light2').addEventListener('click', function () {
     try {
-      client.publish('light2', '1');
+      if (isLight2Open) {
+        client.publish('light2', '0');
+      } else {
+        client.publish('light2', '1');
+      }
     } catch (error) {
       console.log(error);
     }
   });
 
   document.getElementById('pump1').addEventListener('click', function () {
-    client.publish('pump1', '1');
+    if (isPumpOpen) {
+      client.publish('pump', '0');
+    } else {
+      client.publish('pump', '1');
+    }
   });
 
   document.getElementById('air').addEventListener('click', function () {
-    client.publish('air', '1');
+    if (isAirOpen) {
+      client.publish('air', '0');
+    } else {
+      client.publish('air', '1');
+    }
   });
 
-  document.getElementById('export-data').addEventListener('click', function () {
-    client.publish('export', 'data');
+  document.getElementById('export-data').addEventListener('click', function() {
+    fetch('/exportData')
+      .then(response => {
+        return response.blob();
+      })
+      .then(blob => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'data.xlsx';
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+      })
+      .catch(error => {
+        console.error('Lỗi khi tải file: ', error);
+      });
   });
 
   document.getElementById('open-door').addEventListener('click', function () {
